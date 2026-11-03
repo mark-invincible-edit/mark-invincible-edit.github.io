@@ -37,6 +37,7 @@ dialog{background:var(--pn);color:var(--tx);border:1px solid var(--ln);border-ra
 dialog::backdrop{background:#0008}
 dialog textarea{height:50vh;font-family:Consolas,monospace;font-size:12px}
 .tg{font:700 13px Consolas,monospace;color:var(--ac)}
+#ly{max-height:220px;overflow:auto;border:1px solid var(--ln);border-radius:7px;background:var(--bg)}.ly{font:12px Consolas,monospace;padding:3px 6px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ly:hover{background:var(--ln)}.ly.on{background:var(--ac);color:var(--on)}
 @media(max-width:900px){body{height:auto}main{display:block}#stage{height:70vh}aside,aside.r{border:0;border-bottom:1px solid var(--ln)}}
 </style>
 </head>
@@ -62,6 +63,7 @@ dialog textarea{height:50vh;font-family:Consolas,monospace;font-size:12px}
       <button data-a="b">Button</button><button data-a="i">Image</button>
       <button data-a="l">Line</button><button data-a="x">Box</button>
     </div>
+    <h3>Elements</h3><div id="ly"></div>
     <p class="hint" style="margin-top:16px"><b>Click</b> an element to select it.<br><b>Drag</b> it to move it.<br><b>Double-click</b> text to type.<br><b>Delete</b> key removes it.<br>New elements land after the selected one.</p>
   </aside>
   <div id="stage"><iframe id="fr" sandbox="allow-same-origin" title="Site preview"></iframe></div>
@@ -69,6 +71,8 @@ dialog textarea{height:50vh;font-family:Consolas,monospace;font-size:12px}
     <p id="none" class="hint">Select an element on the page to edit its text, links, images, fonts and colors.</p>
     <div id="ifs" hidden>
       <span class="tg" id="tg"></span>
+      <div class="g" style="margin:8px 0"><button id="tS" class="pr">Style</button><button id="tA">✨ Animate</button></div>
+      <div id="pS">
       <label data-k="txt">Text<textarea id="f_txt" rows="3"></textarea></label>
       <label data-k="src">Image link (URL)<input id="f_src" placeholder="https://…"></label>
       <label data-k="src">Alt text<input id="f_alt"></label>
@@ -89,11 +93,22 @@ dialog textarea{height:50vh;font-family:Consolas,monospace;font-size:12px}
         <label>Radius<input id="f_rd" type="number" min="0"></label>
         <label>Width<input id="f_w" placeholder="auto"></label>
       </div>
+      </div>
+      <div id="pA" hidden>
+        <label>Hover effect<select id="f_hv"><option value="">None</option><option value="glow">Glow</option><option value="grow">Grow bigger</option><option value="shrink">Shrink</option><option value="lift">Lift up</option><option value="tilt">Tilt</option><option value="bright">Brighten</option></select></label>
+        <label id="gcl">Glow color<input id="f_gc" type="color" value="#ffb347"></label>
+        <label>Entrance / loop animation<select id="f_an"><option value="">None</option><option value="fade">Fade in</option><option value="rise">Rise up &amp; fade in</option><option value="drop">Drop down &amp; fade in</option><option value="left">Slide in from left</option><option value="right">Slide in from right</option><option value="zoom">Zoom in</option><option value="bounce">Bounce in</option><option value="pulse">Pulse (loops)</option><option value="float">Float (loops)</option><option value="spin">Spin (loops)</option></select></label>
+        <div class="row"><label>Duration (s)<input id="f_ad" type="number" step=".1" min=".1"></label><label>Delay (s)<input id="f_adl" type="number" step=".1" min="0"></label></div>
+        <div class="g"><button id="an_re" class="pr">▶ Replay</button><button id="an_x">Clear</button></div>
+        <button id="an_all" style="width:100%;margin-top:6px">Apply to all elements of this type</button>
+        <p class="hint">Hover over elements in the preview to try hover effects. Entrance animations play when the page loads, and everything is saved in the exported HTML.</p>
+      </div>
       <h3>Element</h3>
       <div class="g">
         <button id="a_up">↑ Move up</button><button id="a_dn">↓ Move down</button>
         <button id="a_dp">Duplicate</button><button id="a_rp">Reset drag</button>
       </div>
+      <button id="a_pa" style="width:100%;margin-top:6px">⬉ Select parent element</button>
       <button id="a_dl" style="width:100%;margin-top:6px;color:var(--ac)">Delete element</button>
     </div>
   </aside>
@@ -130,6 +145,7 @@ fr.onload=()=>{D=fr.contentDocument;if(!D||!D.body)return;
  const s=D.createElement('style');s.id='ed-style';
  s.textContent='.ed-sel{outline:2px solid #e0552b!important;outline-offset:2px}*:hover{outline:1px dashed #e0552b99}[contenteditable]{cursor:text;outline:2px solid #2575fc!important}body{min-height:100vh}';
  D.head.appendChild(s);
+ if(!D.getElementById('ed-anim')){const a=D.createElement('style');a.id='ed-anim';a.textContent=ANCSS;D.head.appendChild(a)}
  D.addEventListener('click',e=>{if(!edit)e.preventDefault()},true);
  D.addEventListener('pointerdown',down);D.addEventListener('dblclick',dbl);
  D.addEventListener('keydown',e=>{if(!edit&&e.key==='Delete'&&sel&&sel!==D.body)del()});
@@ -140,7 +156,7 @@ $('#pl').onclick=()=>{if($('#pt').value.trim()){load($('#pt').value);dp.close()}
 
 /* ---------- selection, drag, inline edit ---------- */
 function pick(t){if(sel)sel.classList.remove('ed-sel');if(t===D.documentElement)t=D.body;sel=t;
- $('#ifs').hidden=!t;$('#none').hidden=!!t;if(!t)return;t.classList.add('ed-sel');fill()}
+ layers();$('#ifs').hidden=!t;$('#none').hidden=!!t;if(!t)return;t.classList.add('ed-sel');fill()}
 const hex=c=>{const m=c.match(/[\d.]+/g);if(!m||(m[3]!==undefined&&+m[3]===0))return'';return'#'+m.slice(0,3).map(n=>(+n|0).toString(16).padStart(2,'0')).join('')};
 const show=(k,on)=>document.querySelectorAll(`[data-k=${k}]`).forEach(e=>e.hidden=!on);
 function fill(){const t=sel,c=getComputedStyle(t),n=t.tagName.toLowerCase();
@@ -150,7 +166,7 @@ function fill(){const t=sel,c=getComputedStyle(t),n=t.tagName.toLowerCase();
  if(leaf)$('#f_txt').value=t.textContent;
  $('#f_src').value=t.getAttribute('src')||'';$('#f_alt').value=t.getAttribute('alt')||'';$('#f_href').value=t.getAttribute('href')||'';
  $('#f_fs').value=parseInt(c.fontSize);$('#f_c').value=hex(c.color)||'#000000';$('#f_bg').value=hex(c.backgroundColor)||'#ffffff';
- $('#f_al').value='';$('#f_ff').value='';$('#f_pd').value=parseInt(c.paddingTop);$('#f_rd').value=parseInt(c.borderTopLeftRadius);$('#f_w').value=t.style.width}
+ $('#f_al').value='';$('#f_ff').value='';$('#f_pd').value=parseInt(c.paddingTop);$('#f_rd').value=parseInt(c.borderTopLeftRadius);$('#f_w').value=t.style.width;fillA()}
 function down(e){if(e.button||(edit&&edit.contains(e.target)))return;
  const t=e.target;if(edit)endEdit();pick(t);e.preventDefault();
  if(sel===D.body)return;
@@ -163,7 +179,7 @@ function dbl(e){const t=e.target;if(['IMG','HR','BODY','HTML'].includes(t.tagNam
 function endEdit(){if(!edit)return;const t=edit;edit=null;t.removeAttribute('contenteditable');snap();if(sel===t)fill()}
 
 /* ---------- history ---------- */
-function snap(){const s=sel;s&&s.classList.remove('ed-sel');const h=D.body.innerHTML;s&&s.classList.add('ed-sel');if(hist[hist.length-1]!==h)hist.push(h)}
+function snap(){const s=sel;s&&s.classList.remove('ed-sel');const h=D.body.innerHTML;s&&s.classList.add('ed-sel');if(hist[hist.length-1]!==h)hist.push(h);layers()}
 $('#un').onclick=()=>{if(!D||hist.length<2)return;hist.pop();D.body.innerHTML=hist[hist.length-1];sel=null;edit=null;pick(null)};
 
 /* ---------- inspector bindings ---------- */
@@ -196,11 +212,52 @@ $('#vd').onclick=()=>fr.style.width='100%';$('#vm').onclick=()=>fr.style.width='
 
 /* ---------- export ---------- */
 function out(){if(edit)endEdit();const c=D.documentElement.cloneNode(true);const s=c.querySelector('#ed-style');s&&s.remove();
+ if(!c.querySelector('[data-an],[data-hv]')){const a=c.querySelector('#ed-anim');a&&a.remove()}
  c.querySelectorAll('.ed-sel').forEach(e=>{e.classList.remove('ed-sel');if(!e.getAttribute('class'))e.removeAttribute('class')});
  c.querySelectorAll('[contenteditable]').forEach(e=>e.removeAttribute('contenteditable'));return'<!DOCTYPE html>\n'+c.outerHTML}
 $('#ex').onclick=()=>{if(!D)return;$('#xt').value=out();dx.showModal()};
 $('#dw').onclick=()=>{try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([$('#xt').value],{type:'text/html'}));a.download='my-site.html';document.body.appendChild(a);a.click();a.remove()}catch(e){alert('Download blocked here – use Copy code instead.')}};
 $('#cp').onclick=async()=>{const t=$('#xt');try{await navigator.clipboard.writeText(t.value)}catch(e){t.select();document.execCommand('copy')}$('#cp').textContent='Copied ✓';setTimeout(()=>$('#cp').textContent='Copy code',1500)};
+
+/* ---------- animations ---------- */
+const ANCSS=`[data-an]{animation-duration:var(--ad,.8s);animation-delay:var(--adl,0s);animation-fill-mode:backwards;animation-timing-function:ease-out}
+[data-an=fade]{animation-name:ed-fade}[data-an=rise]{animation-name:ed-rise}[data-an=drop]{animation-name:ed-drop}[data-an=left]{animation-name:ed-left}[data-an=right]{animation-name:ed-right}[data-an=zoom]{animation-name:ed-zoom}[data-an=bounce]{animation-name:ed-bounce}[data-an=pulse]{animation-name:ed-pulse}[data-an=float]{animation-name:ed-float}[data-an=spin]{animation-name:ed-spin}
+[data-an=pulse],[data-an=float],[data-an=spin]{animation-iteration-count:infinite;animation-timing-function:ease-in-out}[data-an=spin]{animation-timing-function:linear}
+@keyframes ed-fade{from{opacity:0}}@keyframes ed-rise{from{opacity:0;transform:translateY(40px)}}@keyframes ed-drop{from{opacity:0;transform:translateY(-40px)}}@keyframes ed-left{from{opacity:0;transform:translateX(-60px)}}@keyframes ed-right{from{opacity:0;transform:translateX(60px)}}@keyframes ed-zoom{from{opacity:0;transform:scale(.6)}}
+@keyframes ed-bounce{0%{opacity:0;transform:translateY(-60px)}50%{opacity:1;transform:translateY(12px)}70%{transform:translateY(-6px)}100%{transform:none}}
+@keyframes ed-pulse{50%{transform:scale(1.08)}}@keyframes ed-float{50%{transform:translateY(-10px)}}@keyframes ed-spin{to{transform:rotate(360deg)}}
+[data-hv]{transition:transform .25s ease,box-shadow .25s ease,filter .25s ease}
+[data-hv=glow]:hover{box-shadow:0 0 18px 4px var(--gc,#ffb347)}[data-hv=grow]:hover{transform:scale(1.12)}[data-hv=shrink]:hover{transform:scale(.92)}[data-hv=lift]:hover{transform:translateY(-6px);box-shadow:0 10px 20px #0004}[data-hv=tilt]:hover{transform:rotate(-4deg) scale(1.05)}[data-hv=bright]:hover{filter:brightness(1.25)}`;
+const ib=e=>{if(getComputedStyle(e).display=='inline')e.style.display='inline-block'};
+const setA=(k,v)=>{if(sel)v?sel.setAttribute(k,v):sel.removeAttribute(k)};
+function fillA(){const t=sel,g=p=>parseFloat(t.style.getPropertyValue(p));
+ $('#f_hv').value=t.getAttribute('data-hv')||'';$('#f_an').value=t.getAttribute('data-an')||'';
+ $('#gcl').hidden=$('#f_hv').value!='glow';
+ $('#f_ad').value=g('--ad')||.8;$('#f_adl').value=g('--adl')||0}
+function replay(){if(!sel)return;const a=sel.getAttribute('data-an');if(!a)return;sel.removeAttribute('data-an');void sel.offsetWidth;sel.setAttribute('data-an',a)}
+$('#f_hv').onchange=e=>{if(!sel)return;ib(sel);setA('data-hv',e.target.value);fillA();snap()};
+$('#f_an').onchange=e=>{if(!sel)return;ib(sel);setA('data-an',e.target.value);replay();snap()};
+B('f_gc',v=>sel.style.setProperty('--gc',v));
+B('f_ad',v=>sel.style.setProperty('--ad',v+'s'));B('f_adl',v=>sel.style.setProperty('--adl',v+'s'));
+['f_ad','f_adl'].forEach(i=>$('#'+i).addEventListener('change',replay));
+$('#an_re').onclick=replay;
+$('#an_x').onclick=()=>{if(!sel)return;['data-an','data-hv'].forEach(k=>sel.removeAttribute(k));['--gc','--ad','--adl'].forEach(p=>sel.style.removeProperty(p));fillA();snap()};
+$('#an_all').onclick=()=>{if(!sel)return;let n=0;const d=parseFloat(sel.style.getPropertyValue('--adl'))||0;
+ D.body.querySelectorAll(sel.tagName).forEach(e=>{if(e===sel)return;n++;ib(e);
+  ['data-an','data-hv'].forEach(k=>sel.hasAttribute(k)?e.setAttribute(k,sel.getAttribute(k)):e.removeAttribute(k));
+  ['--gc','--ad'].forEach(p=>sel.style.getPropertyValue(p)?e.style.setProperty(p,sel.style.getPropertyValue(p)):e.style.removeProperty(p));
+  sel.hasAttribute('data-an')?e.style.setProperty('--adl',(d+n*.15)+'s'):e.style.removeProperty('--adl')});snap()};
+const tab=a=>{$('#pS').hidden=a;$('#pA').hidden=!a;$('#tS').classList.toggle('pr',!a);$('#tA').classList.toggle('pr',a)};
+$('#tS').onclick=()=>tab(0);$('#tA').onclick=()=>tab(1);
+
+/* ---------- select helpers ---------- */
+let LY=[];
+$('#a_pa').onclick=()=>{if(sel&&sel!==D.body&&sel.parentElement)pick(sel.parentElement)};
+function layers(){const L=$('#ly');L.textContent='';LY=[];if(!D||!D.body)return;
+ (function w(p,d){for(const e of p.children){if(d>5||/^(SCRIPT|STYLE|LINK|META|NOSCRIPT)$/.test(e.tagName))continue;
+  const r=document.createElement('div');LY.push(e);r.className='ly'+(e===sel?' on':'');r.style.paddingLeft=(d*10+6)+'px';
+  r.textContent=e.tagName.toLowerCase()+(e.children.length?'':' · '+e.textContent.trim().slice(0,14));
+  r.onclick=()=>{pick(e);e.scrollIntoView({block:'nearest'})};L.appendChild(r);w(e,d+1)}})(D.body,0)}
 
 load(TPL['Launch page']);
 </script>
