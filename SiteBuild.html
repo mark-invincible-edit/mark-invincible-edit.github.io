@@ -63,6 +63,13 @@ dialog h3{margin-top:0}
 .ly{font:12px Consolas,monospace;padding:3px 6px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ly:hover{background:var(--ln)}
 .ly.on{background:var(--ac);color:var(--on)}
+#dev{position:relative}
+#hw{position:absolute;left:0;right:0;overflow:hidden;pointer-events:none}
+#hs{position:absolute}
+#hs i{position:absolute;width:11px;height:11px;background:#fff;border:2px solid #e0552b;border-radius:3px;transform:translate(-50%,-50%);pointer-events:auto;touch-action:none;box-shadow:0 1px 4px #0005}
+#hs i:hover{background:#e0552b}
+[data-d=nw]{left:0;top:0;cursor:nwse-resize}[data-d=n]{left:50%;top:0;cursor:ns-resize}[data-d=ne]{left:100%;top:0;cursor:nesw-resize}[data-d=e]{left:100%;top:50%;cursor:ew-resize}[data-d=se]{left:100%;top:100%;cursor:nwse-resize}[data-d=s]{left:50%;top:100%;cursor:ns-resize}[data-d=sw]{left:0;top:100%;cursor:nesw-resize}[data-d=w]{left:0;top:50%;cursor:ew-resize}
+#hb{position:absolute;left:100%;top:100%;margin-top:10px;transform:translateX(-100%);background:#211e1a;color:#fff;font:600 11px Consolas,monospace;padding:2px 7px;border-radius:5px;white-space:nowrap;pointer-events:none}
 @media(max-width:900px){body{height:auto}main{display:block}#stage{height:75vh}aside,aside.r{border:0;border-bottom:1px solid var(--ln)}}
 </style>
 </head>
@@ -91,9 +98,9 @@ dialog h3{margin-top:0}
     <h3>Ready-made sections</h3>
     <div class="g"><button data-s="nav">Sticky navbar</button><button data-s="hero">Hero banner</button><button data-s="feat">Features</button><button data-s="price">Pricing</button><button data-s="form">Contact form</button><button data-s="foot">Footer</button></div>
     <h3>Elements</h3><div id="ly"></div>
-    <p class="hint" style="margin-top:16px"><b>Click</b> an element to select it.<br><b>Drag</b> it to move it.<br><b>Double-click</b> text to type.<br><b>Delete</b> key removes it.<br>New elements land after the selected one.</p>
+    <p class="hint" style="margin-top:16px"><b>Click</b> an element to select it.<br><b>Drag</b> it to move it, or pull the square handles to resize (Shift flips the aspect lock).<br><b>Double-click</b> text to type.<br><b>Delete</b> key removes it.<br>New elements land after the selected one.</p>
   </aside>
-  <div id="stage"><div id="dev"><div id="bar"><i></i><i></i><i></i><span>Untitled page</span></div><iframe id="fr" sandbox="allow-same-origin" title="Site preview"></iframe></div></div>
+  <div id="stage"><div id="dev"><div id="bar"><i></i><i></i><i></i><span>Untitled page</span></div><iframe id="fr" sandbox="allow-same-origin" title="Site preview"></iframe><div id="hw"><div id="hs" hidden><b id="hb" hidden></b><i data-d="nw"></i><i data-d="n"></i><i data-d="ne"></i><i data-d="e"></i><i data-d="se"></i><i data-d="s"></i><i data-d="sw"></i><i data-d="w"></i></div></div></div></div>
   <aside class="r">
     <p id="none" class="hint">Select an element on the page to edit its text, links, images, fonts and colors.</p>
     <div id="ifs" hidden>
@@ -150,6 +157,7 @@ dialog h3{margin-top:0}
         <button id="a_up">↑ Move up</button><button id="a_dn">↓ Move down</button>
         <button id="a_dp">Duplicate</button><button id="a_rp">Reset drag</button>
       </div>
+      <button id="a_rs" style="width:100%;margin-top:6px">Reset size</button>
       <button id="a_pa" style="width:100%;margin-top:6px">⬉ Select parent element</button>
       <button id="a_dl" style="width:100%;margin-top:6px;color:var(--ac)">Delete element</button>
     </div>
@@ -377,6 +385,36 @@ function chkFav(){const u=$('#p_fu').value.trim(),st=$('#p_fs'),box=$('#p_fp'),n
  im.onerror=()=>{if(n!=favN)return;clearTimeout(favT);st.className='hint bad';st.textContent='✕ Could not load an image from this link. Check the URL.'};
  im.src=u}
 $('#p_fu').oninput=()=>{favOK=!$('#p_fu').value.trim();clearTimeout(favD);favD=setTimeout(chkFav,400)};
+
+/* ---------- resize handles ---------- */
+const hs=$('#hs'),hw=$('#hw');let hk='';
+function updH(){const t=sel;
+ if(!D||!t||t===D.body||edit||!t.isConnected){hs.hidden=true;return}
+ const r=t.getBoundingClientRect();if(r.width<2&&r.height<2){hs.hidden=true;return}
+ hw.style.top=fr.offsetTop+'px';hw.style.height=fr.offsetHeight+'px';
+ const k=[r.left,r.top,r.width,r.height].join();
+ if(k!=hk){hk=k;hs.style.left=r.left+'px';hs.style.top=r.top+'px';hs.style.width=r.width+'px';hs.style.height=r.height+'px'}
+ hs.hidden=false}
+(function f(){updH();requestAnimationFrame(f)})();
+hs.addEventListener('pointerdown',e=>{const d=e.target.dataset.d;if(!d||!sel)return;e.preventDefault();e.stopPropagation();
+ const h=e.target,t=sel,r=t.getBoundingClientRect(),w0=r.width,h0=r.height,x0=e.clientX,y0=e.clientY,img=t.tagName=='IMG',corner=d.length==2;
+ const p=(t.style.translate||'').split(' ');let tx=parseFloat(p[0])||0,ty=parseFloat(p[1])||0;
+ const W=d.includes('e')?1:d.includes('w')?-1:0,H=d.includes('s')?1:d.includes('n')?-1:0;
+ h.setPointerCapture(e.pointerId);ib(t);t.style.boxSizing='border-box';if(img)t.style.maxWidth='none';
+ const hb=$('#hb');hb.hidden=false;
+ const mv=v=>{let w=w0+W*(v.clientX-x0),g=h0+H*(v.clientY-y0);
+  const lock=corner&&(img!==v.shiftKey);
+  if(lock){const k=Math.abs(W*(v.clientX-x0))/w0>=Math.abs(H*(v.clientY-y0))/h0?w/w0:g/h0;w=w0*k;g=h0*k}
+  w=Math.max(12,w);g=Math.max(12,g);
+  if(W||lock)t.style.width=w+'px';
+  if(lock&&img)t.style.height='auto';else if(H||lock){t.style.height=g+'px';if(img)t.style.objectFit='cover'}
+  let n=t.getBoundingClientRect();
+  if(W)tx+=(W>0?r.left-n.left:r.right-n.right);if(H)ty+=(H>0?r.top-n.top:r.bottom-n.bottom);
+  if(W||H)t.style.translate=tx+'px '+ty+'px';
+  n=t.getBoundingClientRect();hb.textContent=Math.round(n.width)+' × '+Math.round(n.height)};
+ const up=()=>{h.removeEventListener('pointermove',mv);h.removeEventListener('pointerup',up);h.removeEventListener('pointercancel',up);hb.hidden=true;snap();fill()};
+ h.addEventListener('pointermove',mv);h.addEventListener('pointerup',up);h.addEventListener('pointercancel',up)});
+$('#a_rs').onclick=()=>{if(sel){const s=sel.style;s.width='';s.height='';s.objectFit='';snap();fill()}};
 
 load(TPL['Launch page']);
 </script>
