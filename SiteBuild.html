@@ -45,7 +45,7 @@ dialog textarea{height:50vh;font-family:Consolas,monospace;font-size:12px}
 <header>
   <h1>Page<i>Forge</i></h1>
   <button id="vd" class="pr">Desktop</button><button id="vm">Mobile</button>
-  <button id="un">↶ Undo</button>
+  <button id="pg">⚙ Page settings</button><button id="un">↶ Undo</button>
   <button id="ex" class="pr">Export HTML</button>
 </header>
 <main>
@@ -63,6 +63,8 @@ dialog textarea{height:50vh;font-family:Consolas,monospace;font-size:12px}
       <button data-a="b">Button</button><button data-a="i">Image</button>
       <button data-a="l">Line</button><button data-a="x">Box</button>
     </div>
+    <h3>Ready-made sections</h3>
+    <div class="g"><button data-s="nav">Sticky navbar</button><button data-s="hero">Hero banner</button><button data-s="feat">Features</button><button data-s="price">Pricing</button><button data-s="form">Contact form</button><button data-s="foot">Footer</button></div>
     <h3>Elements</h3><div id="ly"></div>
     <p class="hint" style="margin-top:16px"><b>Click</b> an element to select it.<br><b>Drag</b> it to move it.<br><b>Double-click</b> text to type.<br><b>Delete</b> key removes it.<br>New elements land after the selected one.</p>
   </aside>
@@ -71,12 +73,13 @@ dialog textarea{height:50vh;font-family:Consolas,monospace;font-size:12px}
     <p id="none" class="hint">Select an element on the page to edit its text, links, images, fonts and colors.</p>
     <div id="ifs" hidden>
       <span class="tg" id="tg"></span>
-      <div class="g" style="margin:8px 0"><button id="tS" class="pr">Style</button><button id="tA">✨ Animate</button></div>
+      <div class="g" style="margin:8px 0;grid-template-columns:repeat(3,1fr)"><button id="tS" class="pr">Style</button><button id="tD">Design</button><button id="tA">Animate</button></div>
       <div id="pS">
       <label data-k="txt">Text<textarea id="f_txt" rows="3"></textarea></label>
       <label data-k="src">Image link (URL)<input id="f_src" placeholder="https://…"></label>
       <label data-k="src">Alt text<input id="f_alt"></label>
       <label data-k="href">Link goes to<input id="f_href" placeholder="https://…"></label>
+      <label data-k="act">Form sends to (URL)<input id="f_act" placeholder="https://formspree.io/f/…"></label>
       <label>Font<select id="f_ff"></select></label>
       <div class="row">
         <label>Size (px)<input id="f_fs" type="number" min="6" max="200"></label>
@@ -93,6 +96,20 @@ dialog textarea{height:50vh;font-family:Consolas,monospace;font-size:12px}
         <label>Radius<input id="f_rd" type="number" min="0"></label>
         <label>Width<input id="f_w" placeholder="auto"></label>
       </div>
+      </div>
+      <div id="pD" hidden>
+        <h3>Gradient background</h3>
+        <div class="row"><label>From<input id="g1" type="color" value="#ff7a4d"></label><label>To<input id="g2" type="color" value="#6a11cb"></label></div>
+        <label>Angle<input id="gad" type="range" min="0" max="360" value="135"></label>
+        <div id="gpre" class="g" style="grid-template-columns:repeat(3,1fr);margin-bottom:6px"></div>
+        <div class="g"><button id="g_ap" class="pr">Apply gradient</button><button id="g_x">Remove</button></div>
+        <button id="g_t" style="width:100%;margin-top:6px">Make text gradient-colored</button>
+        <h3>Shadow &amp; border</h3>
+        <label>Shadow<select id="d_sh"><option value="">None</option><option value="0 2px 8px #0002">Soft</option><option value="0 8px 24px #0003">Medium</option><option value="0 16px 48px #0005">Strong</option><option value="0 0 24px #ffb347">Glow</option></select></label>
+        <div class="row"><label>Border (px)<input id="d_bw" type="number" min="0"></label><label>Border color<input id="d_bc" type="color" value="#cccccc"></label></div>
+        <h3>Layout (for containers)</h3>
+        <label>Arrange children<select id="d_ly"><option value="">(unchanged)</option><option value="row">Side by side</option><option value="col">Stacked</option><option value="grid">Responsive grid</option><option value="block">Normal</option></select></label>
+        <div class="row"><label>Gap (px)<input id="d_gp" type="number" min="0"></label><label>Justify<select id="d_jc"><option value="">—</option><option value="flex-start">Start</option><option value="center">Center</option><option value="space-between">Space between</option><option value="flex-end">End</option></select></label></div>
       </div>
       <div id="pA" hidden>
         <label>Hover effect<select id="f_hv"><option value="">None</option><option value="glow">Glow</option><option value="grow">Grow bigger</option><option value="shrink">Shrink</option><option value="lift">Lift up</option><option value="tilt">Tilt</option><option value="bright">Brighten</option></select></label>
@@ -116,6 +133,13 @@ dialog textarea{height:50vh;font-family:Consolas,monospace;font-size:12px}
 
 <dialog id="dp"><h3>Paste HTML code</h3><textarea id="pt" placeholder="Paste a full HTML page here…"></textarea>
   <div class="row" style="margin-top:10px;justify-content:flex-end"><button onclick="dp.close()">Cancel</button><button class="pr" id="pl">Load into editor</button></div></dialog>
+<dialog id="dg"><h3>Page settings</h3>
+  <label>Page title (browser tab &amp; Google)<input id="p_t"></label>
+  <label>Description (shown in search results)<textarea id="p_d" style="height:70px;font-family:inherit;font-size:13px"></textarea></label>
+  <div class="row"><label>Favicon emoji<input id="p_f" placeholder="e.g. 🚀"></label><label>Language code<input id="p_l" placeholder="en"></label></div>
+  <label style="flex-direction:row;align-items:center;gap:8px;color:var(--tx)"><input id="p_m" type="checkbox" style="width:auto"> Make mobile-friendly (viewport tag, images never overflow)</label>
+  <label style="flex-direction:row;align-items:center;gap:8px;color:var(--tx)"><input id="p_s" type="checkbox" style="width:auto"> Smooth scrolling for anchor links</label>
+  <div class="row" style="margin-top:10px;justify-content:flex-end"><button onclick="dg.close()">Cancel</button><button class="pr" id="p_ok">Apply</button></div></dialog>
 <dialog id="dx"><h3>Export</h3><textarea id="xt" readonly></textarea>
   <div class="row" style="margin-top:10px;justify-content:flex-end"><button onclick="dx.close()">Close</button><button id="cp">Copy code</button><button class="pr" id="dw">Download .html</button></div></dialog>
 
@@ -161,12 +185,12 @@ const hex=c=>{const m=c.match(/[\d.]+/g);if(!m||(m[3]!==undefined&&+m[3]===0))re
 const show=(k,on)=>document.querySelectorAll(`[data-k=${k}]`).forEach(e=>e.hidden=!on);
 function fill(){const t=sel,c=getComputedStyle(t),n=t.tagName.toLowerCase();
  $('#tg').textContent='<'+n+'>';
- const leaf=!t.children.length&&!['img','hr','body'].includes(n);
- show('txt',leaf);show('src',n=='img');show('href',n=='a');
+ const leaf=!t.children.length&&!['img','hr','body','input'].includes(n);
+ show('txt',leaf);show('src',n=='img');show('href',n=='a');show('act',n=='form');$('#f_act').value=t.getAttribute('action')||'';
  if(leaf)$('#f_txt').value=t.textContent;
  $('#f_src').value=t.getAttribute('src')||'';$('#f_alt').value=t.getAttribute('alt')||'';$('#f_href').value=t.getAttribute('href')||'';
  $('#f_fs').value=parseInt(c.fontSize);$('#f_c').value=hex(c.color)||'#000000';$('#f_bg').value=hex(c.backgroundColor)||'#ffffff';
- $('#f_al').value='';$('#f_ff').value='';$('#f_pd').value=parseInt(c.paddingTop);$('#f_rd').value=parseInt(c.borderTopLeftRadius);$('#f_w').value=t.style.width;fillA()}
+ $('#f_al').value='';$('#f_ff').value='';$('#f_pd').value=parseInt(c.paddingTop);$('#f_rd').value=parseInt(c.borderTopLeftRadius);$('#f_w').value=t.style.width;fillA();fillD()}
 function down(e){if(e.button||(edit&&edit.contains(e.target)))return;
  const t=e.target;if(edit)endEdit();pick(t);e.preventDefault();
  if(sel===D.body)return;
@@ -186,7 +210,7 @@ $('#un').onclick=()=>{if(!D||hist.length<2)return;hist.pop();D.body.innerHTML=hi
 const B=(id,fn)=>{const e=$('#'+id);e.addEventListener('input',()=>{if(sel)fn(e.value)});e.addEventListener('change',()=>sel&&snap())};
 B('f_txt',v=>sel.textContent=v);B('f_src',v=>sel.setAttribute('src',v));B('f_alt',v=>sel.setAttribute('alt',v));
 B('f_href',v=>sel.setAttribute('href',v));B('f_fs',v=>sel.style.fontSize=v+'px');B('f_c',v=>sel.style.color=v);
-B('f_bg',v=>sel.style.background=v);B('f_al',v=>v&&(sel.style.textAlign=v));B('f_pd',v=>sel.style.padding=v+'px');
+B('f_bg',v=>sel.style.backgroundColor=v);B('f_act',v=>sel.setAttribute('action',v));B('f_al',v=>v&&(sel.style.textAlign=v));B('f_pd',v=>sel.style.padding=v+'px');
 B('f_rd',v=>sel.style.borderRadius=v+'px');B('f_w',v=>sel.style.width=v);
 B('f_ff',v=>{if(!v)return;if(!SYS.includes(v)&&!D.getElementById('gf-'+v)){const l=D.createElement('link');l.id='gf-'+v;l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family='+v.replace(/ /g,'+')+':wght@400;700&display=swap';D.head.appendChild(l)}sel.style.fontFamily="'"+v+"',sans-serif"});
 $('#b_b').onclick=()=>{if(sel){sel.style.fontWeight=getComputedStyle(sel).fontWeight>=600?'400':'700';snap()}};
@@ -227,7 +251,7 @@ const ANCSS=`[data-an]{animation-duration:var(--ad,.8s);animation-delay:var(--ad
 @keyframes ed-bounce{0%{opacity:0;transform:translateY(-60px)}50%{opacity:1;transform:translateY(12px)}70%{transform:translateY(-6px)}100%{transform:none}}
 @keyframes ed-pulse{50%{transform:scale(1.08)}}@keyframes ed-float{50%{transform:translateY(-10px)}}@keyframes ed-spin{to{transform:rotate(360deg)}}
 [data-hv]{transition:transform .25s ease,box-shadow .25s ease,filter .25s ease}
-[data-hv=glow]:hover{box-shadow:0 0 18px 4px var(--gc,#ffb347)}[data-hv=grow]:hover{transform:scale(1.12)}[data-hv=shrink]:hover{transform:scale(.92)}[data-hv=lift]:hover{transform:translateY(-6px);box-shadow:0 10px 20px #0004}[data-hv=tilt]:hover{transform:rotate(-4deg) scale(1.05)}[data-hv=bright]:hover{filter:brightness(1.25)}`;
+[data-hv=glow]:hover{box-shadow:0 0 18px 4px var(--gc,#ffb347)!important}[data-hv=grow]:hover{transform:scale(1.12)}[data-hv=shrink]:hover{transform:scale(.92)}[data-hv=lift]:hover{transform:translateY(-6px);box-shadow:0 10px 20px #0004!important}[data-hv=tilt]:hover{transform:rotate(-4deg) scale(1.05)}[data-hv=bright]:hover{filter:brightness(1.25)}`;
 const ib=e=>{if(getComputedStyle(e).display=='inline')e.style.display='inline-block'};
 const setA=(k,v)=>{if(sel)v?sel.setAttribute(k,v):sel.removeAttribute(k)};
 function fillA(){const t=sel,g=p=>parseFloat(t.style.getPropertyValue(p));
@@ -247,8 +271,8 @@ $('#an_all').onclick=()=>{if(!sel)return;let n=0;const d=parseFloat(sel.style.ge
   ['data-an','data-hv'].forEach(k=>sel.hasAttribute(k)?e.setAttribute(k,sel.getAttribute(k)):e.removeAttribute(k));
   ['--gc','--ad'].forEach(p=>sel.style.getPropertyValue(p)?e.style.setProperty(p,sel.style.getPropertyValue(p)):e.style.removeProperty(p));
   sel.hasAttribute('data-an')?e.style.setProperty('--adl',(d+n*.15)+'s'):e.style.removeProperty('--adl')});snap()};
-const tab=a=>{$('#pS').hidden=a;$('#pA').hidden=!a;$('#tS').classList.toggle('pr',!a);$('#tA').classList.toggle('pr',a)};
-$('#tS').onclick=()=>tab(0);$('#tA').onclick=()=>tab(1);
+const tab=i=>['pS','pD','pA'].forEach((id,j)=>{$('#'+id).hidden=i!=j;$('#t'+'SDA'[j]).classList.toggle('pr',i==j)});
+$('#tS').onclick=()=>tab(0);$('#tD').onclick=()=>tab(1);$('#tA').onclick=()=>tab(2);
 
 /* ---------- select helpers ---------- */
 let LY=[];
@@ -258,6 +282,51 @@ function layers(){const L=$('#ly');L.textContent='';LY=[];if(!D||!D.body)return;
   const r=document.createElement('div');LY.push(e);r.className='ly'+(e===sel?' on':'');r.style.paddingLeft=(d*10+6)+'px';
   r.textContent=e.tagName.toLowerCase()+(e.children.length?'':' · '+e.textContent.trim().slice(0,14));
   r.onclick=()=>{pick(e);e.scrollIntoView({block:'nearest'})};L.appendChild(r);w(e,d+1)}})(D.body,0)}
+
+/* ---------- design: gradient, shadow, border, layout ---------- */
+const GR=()=>`linear-gradient(${$('#gad').value}deg,${$('#g1').value},${$('#g2').value})`;
+const applyG=()=>{if(sel)sel.style.backgroundImage=GR()};
+['g1','g2','gad'].forEach(i=>{const e=$('#'+i);e.addEventListener('input',applyG);e.addEventListener('change',()=>sel&&snap())});
+[['Sunset','#ff9966','#ff5e62'],['Ocean','#2193b0','#6dd5ed'],['Berry','#8e2de2','#4a00e0'],['Forest','#11998e','#38ef7d'],['Midnight','#232526','#5b6068'],['Peach','#ffecd2','#fcb69f']].forEach(([n,a,b])=>{
+ const x=document.createElement('button');x.textContent=n;x.style.cssText=`background-image:linear-gradient(135deg,${a},${b});color:#fff;text-shadow:0 1px 2px #0006;border:0;padding:8px 4px`;
+ x.onclick=()=>{$('#g1').value=a;$('#g2').value=b;if(sel){applyG();snap()}};$('#gpre').appendChild(x)});
+$('#g_ap').onclick=()=>{if(sel){applyG();snap()}};
+$('#g_x').onclick=()=>{if(!sel)return;const t=sel.style;t.backgroundImage='none';t.backgroundClip='';t.webkitBackgroundClip='';if(t.color=='transparent')t.color='';snap()};
+$('#g_t').onclick=()=>{if(!sel)return;ib(sel);applyG();const t=sel.style;t.webkitBackgroundClip='text';t.backgroundClip='text';t.color='transparent';snap()};
+const applyB=()=>{if(!sel)return;const w=+$('#d_bw').value;sel.style.border=w>0?w+'px solid '+$('#d_bc').value:'none'};
+B('d_sh',v=>sel.style.boxShadow=v);B('d_bw',applyB);B('d_bc',()=>{if(+$('#d_bw').value<=0)$('#d_bw').value=1;applyB()});
+B('d_ly',v=>{if(!v)return;const s=sel.style;s.display=v=='block'?'block':v=='grid'?'grid':'flex';s.flexDirection=v=='col'?'column':v=='row'?'row':'';s.flexWrap=v=='row'?'wrap':'';s.gridTemplateColumns=v=='grid'?'repeat(auto-fit,minmax(200px,1fr))':''});
+B('d_gp',v=>sel.style.gap=v+'px');B('d_jc',v=>sel.style.justifyContent=v);
+function fillD(){const c=getComputedStyle(sel);$('#d_sh').value=sel.style.boxShadow&&[...$('#d_sh').options].some(o=>o.value==sel.style.boxShadow)?sel.style.boxShadow:'';
+ $('#d_bw').value=parseInt(c.borderTopWidth)||0;$('#d_bc').value=hex(c.borderTopColor)||'#cccccc';$('#d_ly').value='';$('#d_jc').value='';$('#d_gp').value=parseInt(c.columnGap)||0}
+
+/* ---------- ready-made sections ---------- */
+const FA='font-family:Arial,sans-serif;',IN='padding:12px;border:1px solid #ccc;border-radius:8px;',BT=(c,t)=>`<a href="#" style="display:inline-block;padding:12px 26px;background:${c};color:#fff;border-radius:8px;text-decoration:none;font-weight:700">${t}</a>`;
+const GRID=`padding:60px 24px;${FA}display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;max-width:960px;margin:auto;`;
+const SEC={
+nav:()=>`<nav style="position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:16px 28px;background:#fff;box-shadow:0 2px 8px #0002;${FA}"><b style="font-size:20px">YourBrand</b><div style="display:flex;gap:20px;flex-wrap:wrap">${['Home','About','Pricing','Contact'].map(t=>`<a href="#" style="color:#333;text-decoration:none">${t}</a>`).join('')}</div></nav>`,
+hero:()=>`<section style="padding:90px 24px;text-align:center;color:#fff;background-image:linear-gradient(135deg,#6a11cb,#2575fc);${FA}"><h1 style="font-size:44px;margin:0 0 12px">Headline that grabs attention</h1><p style="font-size:18px;opacity:.85;margin:0 0 26px">One supporting sentence about your product.</p><a href="#" style="display:inline-block;padding:14px 30px;background:#fff;color:#2575fc;border-radius:30px;text-decoration:none;font-weight:700">Get started</a></section>`,
+feat:()=>`<section style="${GRID}">`+['One','Two','Three'].map(n=>`<div style="padding:24px;border-radius:14px;background:#f5f5f7"><h3 style="margin:0 0 8px">Feature ${n}</h3><p style="margin:0;color:#555">Short description of this benefit.</p></div>`).join('')+`</section>`,
+price:()=>`<section style="${GRID}text-align:center">`+[['Basic','$9'],['Pro','$29'],['Team','$79']].map(([n,p],i)=>`<div style="padding:28px;border-radius:16px;border:2px solid ${i==1?'#6a11cb':'#e3e3e8'};${i==1?'box-shadow:0 12px 30px #6a11cb33;':''}"><h3 style="margin:0">${n}</h3><p style="font-size:38px;font-weight:700;margin:12px 0">${p}<small style="font-size:14px;font-weight:400">/mo</small></p><p style="color:#666">Feature, feature, feature</p>${BT('#6a11cb','Choose '+n)}</div>`).join('')+`</section>`,
+form:()=>`<form action="https://formspree.io/f/your-form-id" method="post" style="max-width:480px;margin:50px auto;padding:0 20px;${FA}display:flex;flex-direction:column;gap:12px"><h2 style="margin:0">Contact us</h2><input name="name" placeholder="Your name" style="${IN}"><input name="email" type="email" placeholder="Email address" style="${IN}"><textarea name="message" rows="4" placeholder="Message" style="${IN}"></textarea><button type="submit" style="padding:13px;background:#2575fc;color:#fff;border:0;border-radius:8px;font-weight:700;cursor:pointer">Send message</button></form>`,
+foot:()=>`<footer style="padding:28px;text-align:center;background:#14213d;color:#cbd5e1;${FA}">© 2026 YourBrand · <a href="#" style="color:#fff">Privacy</a> · <a href="#" style="color:#fff">Terms</a></footer>`};
+document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{if(!D)return;const k=b.dataset.s,w=D.createElement('div');w.innerHTML=SEC[k]();const n=w.firstElementChild;
+ if(k=='nav')D.body.prepend(n);else if(k=='foot')D.body.appendChild(n);
+ else{let a=sel;while(a&&a!==D.body&&a.parentElement!==D.body)a=a.parentElement;a&&a!==D.body?a.after(n):D.body.appendChild(n)}
+ pick(n);snap();n.scrollIntoView({block:'nearest'})});
+
+/* ---------- page settings ---------- */
+const metaD=()=>D.querySelector('meta[name=description]');
+$('#pg').onclick=()=>{if(!D)return;$('#p_t').value=D.title;$('#p_d').value=(metaD()||{}).content||'';$('#p_l').value=D.documentElement.lang||'';$('#p_f').value='';
+ $('#p_m').checked=!!D.getElementById('ed-resp');$('#p_s').checked=!!D.getElementById('ed-smooth');dg.showModal()};
+const ensure=(id,css,on)=>{let e=D.getElementById(id);if(on&&!e){e=D.createElement('style');e.id=id;e.textContent=css;D.head.appendChild(e)}if(!on&&e)e.remove()};
+$('#p_ok').onclick=()=>{D.title=$('#p_t').value;
+ let m=metaD();const d=$('#p_d').value;if(d){if(!m){m=D.createElement('meta');m.name='description';D.head.appendChild(m)}m.content=d}else if(m)m.remove();
+ if($('#p_l').value)D.documentElement.lang=$('#p_l').value;
+ const f=$('#p_f').value.trim().replace(/[<&>]/g,'');
+ if(f){let k=D.querySelector('link[rel=icon]');if(!k){k=D.createElement('link');k.rel='icon';D.head.appendChild(k)}k.href='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">'+f+'</text></svg>')}
+ if($('#p_m').checked&&!D.querySelector('meta[name=viewport]')){const v=D.createElement('meta');v.name='viewport';v.content='width=device-width,initial-scale=1';D.head.prepend(v)}
+ ensure('ed-resp','img,video{max-width:100%;height:auto}',$('#p_m').checked);ensure('ed-smooth','html{scroll-behavior:smooth}',$('#p_s').checked);dg.close()};
 
 load(TPL['Launch page']);
 </script>
